@@ -3,7 +3,7 @@ name: deprecate
 description: 標記 plugin 為棄用
 ---
 
-# /mp:deprecate — 標記 Plugin 為棄用
+# /cm-ailab-mp:deprecate — 標記 Plugin 為棄用
 
 你是 Team Marketplace 的 plugin 棄用管理助手。幫助使用者將已發佈的 plugin 標記為棄用（deprecated），並可選地指定替代 plugin。
 
@@ -14,7 +14,7 @@ description: 標記 plugin 為棄用
 如果使用者沒有提供名稱，提示：
 
 ```
-請提供要棄用的 plugin 名稱，例如：/mp:deprecate old-tool
+請提供要棄用的 plugin 名稱，例如：/cm-ailab-mp:deprecate old-tool
 ```
 
 ## 步驟 1：查找 Plugin
@@ -30,7 +30,7 @@ gh api repos/cm-ailab-cc-plugins/marketplace/contents/.claude-plugin/marketplace
 ```
 找不到 plugin "<name>"。
 
-💡 查看所有 plugin：/mp:list
+💡 查看所有 plugin：/cm-ailab-mp:list
 ```
 
 ### 已經被棄用
@@ -99,10 +99,10 @@ gh api repos/cm-ailab-cc-plugins/marketplace/contents/.claude-plugin/marketplace
 ╠══════════════════════════════════════════════════╣
 ║ 棄用後的影響:                                    ║
 ║                                                  ║
-║ • /mp:search — 預設不顯示此 plugin               ║
+║ • /cm-ailab-mp:search — 預設不顯示此 plugin               ║
 ║   （使用 --all 旗標才會顯示）                    ║
 ║                                                  ║
-║ • /mp:list — 仍會顯示，但標記 ⚠ 已棄用          ║
+║ • /cm-ailab-mp:list — 仍會顯示，但標記 ⚠ 已棄用          ║
 ║                                                  ║
 ║ • 已安裝的使用者 — 不受影響，繼續正常運作        ║
 ║                                                  ║
@@ -167,11 +167,11 @@ gh pr create \
 - **操作者**: <current-user>
 
 ### 影響
-- \`/mp:search\` 預設不顯示此 plugin
-- \`/mp:list\` 仍顯示但標記 ⚠
+- \`/cm-ailab-mp:search\` 預設不顯示此 plugin
+- \`/cm-ailab-mp:list\` 仍顯示但標記 ⚠
 - 已安裝的使用者不受影響
 
-由 /mp:deprecate 自動建立"
+由 /cm-ailab-mp:deprecate 自動建立"
 ```
 
 ## 步驟 5：顯示結果
@@ -193,7 +193,7 @@ gh pr create \
 
 ## 錯誤處理
 
-- **plugin 不存在**：提示查看 `/mp:list`
+- **plugin 不存在**：提示查看 `/cm-ailab-mp:list`
 - **已經棄用**：告知已經棄用，無需重複操作
 - **權限不足**：提示聯繫管理員或 plugin 作者
 - **PR 建立失敗**：提供手動建立 PR 的步驟

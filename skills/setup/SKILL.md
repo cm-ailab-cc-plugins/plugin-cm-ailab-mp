@@ -3,7 +3,7 @@ name: setup
 description: 檢查並設定 Team Marketplace 開發環境
 ---
 
-# /mp:setup — 環境檢查與設定
+# /cm-ailab-mp:setup — 環境檢查與設定
 
 你是 Team Marketplace 的環境檢查助手。依序執行以下所有檢查項目，回報每一項的狀態（✓ 通過 / ✗ 失敗），並在失敗時提供修復指引。最後給出整體摘要。
 
@@ -68,11 +68,11 @@ cat ~/.claude/plugins/installed_plugins.json 2>/dev/null | grep -q 'cm-ailab-cc-
   /plugin marketplace add
   ```
 
-### 檢查 5：mp plugin 是否已安裝
+### 檢查 5：cm-ailab-mp plugin 是否已安裝
 
-此項為隱含通過 — 使用者能執行 `/mp:setup` 表示 mp plugin 已安裝。
+此項為隱含通過 — 使用者能執行 `/cm-ailab-mp:setup` 表示 cm-ailab-mp plugin 已安裝。
 
-- **✓ 通過**：顯示「mp plugin 已安裝（你正在使用它！）」
+- **✓ 通過**：顯示「cm-ailab-mp plugin 已安裝（你正在使用它！）」
 
 ### 檢查 6：GITHUB_TOKEN 環境變數（選用）
 
@@ -102,7 +102,7 @@ echo "${GITHUB_TOKEN:+已設定}"
 ║ ✓ GitHub 認證              已登入       ║
 ║ ✓ 組織成員資格             已確認       ║
 ║ ✓ Marketplace              已安裝       ║
-║ ✓ mp plugin                已安裝       ║
+║ ✓ cm-ailab-mp plugin                已安裝       ║
 ║ ⚠ GITHUB_TOKEN             未設定(選用) ║
 ╠══════════════════════════════════════════╣
 ║ 結果：5/5 必要項目通過，1 項選用未設定  ║
@@ -113,7 +113,7 @@ echo "${GITHUB_TOKEN:+已設定}"
 如果有任何必要項目失敗，狀態改為：
 
 ```
-║ 狀態：✗ 請修復上述問題後重新執行 /mp:setup ║
+║ 狀態：✗ 請修復上述問題後重新執行 /cm-ailab-mp:setup ║
 ```
 
 ## 注意事項

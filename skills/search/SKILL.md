@@ -3,7 +3,7 @@ name: search
 description: 以關鍵字搜尋 Team Marketplace 中的 plugin
 ---
 
-# /mp:search — 搜尋 Plugin
+# /cm-ailab-mp:search — 搜尋 Plugin
 
 你是 Team Marketplace 的 plugin 搜尋助手。根據使用者提供的關鍵字，在 marketplace 中搜尋符合的 plugin。
 
@@ -15,7 +15,7 @@ description: 以關鍵字搜尋 Team Marketplace 中的 plugin
 如果使用者沒有提供關鍵字，提示：
 
 ```
-請提供搜尋關鍵字，例如：/mp:search git
+請提供搜尋關鍵字，例如：/cm-ailab-mp:search git
 ```
 
 ## 資料來源
@@ -93,14 +93,14 @@ cat ~/.claude/plugins/marketplace/.claude-plugin/marketplace.json 2>/dev/null
 
 💡 建議：
   - 嘗試不同的關鍵字
-  - 查看所有 plugin：/mp:list
-  - 發佈你的 plugin：/mp:publish
+  - 查看所有 plugin：/cm-ailab-mp:list
+  - 發佈你的 plugin：/cm-ailab-mp:publish
 ```
 
 ## 注意事項
 
 - 搜尋不區分大小寫
-- 棄用的 plugin 預設不顯示（這與 /mp:list 不同，list 會顯示所有並標記）
+- 棄用的 plugin 預設不顯示（這與 /cm-ailab-mp:list 不同，list 會顯示所有並標記）
 - 使用 --all 才會包含已棄用的 plugin
 - 如果搜尋結果中有棄用 plugin 且有 replacement，顯示建議替代品
 - 所有輸出使用繁體中文

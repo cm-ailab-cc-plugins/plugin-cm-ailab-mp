@@ -3,7 +3,7 @@ name: validate
 description: 本地驗證 plugin 結構是否符合 marketplace 規範
 ---
 
-# /mp:validate — 本地 Plugin 結構驗證
+# /cm-ailab-mp:validate — 本地 Plugin 結構驗證
 
 你是 Plugin 結構驗證助手。在使用者發佈 plugin 之前，於本地驗證其結構是否符合 Team Marketplace 規範。這等同於 CI 上的驗證檢查，讓使用者在推送前就能發現問題。
 
@@ -247,7 +247,7 @@ done
 
 ```
 ║ 結果: 2 錯誤, 1 警告                            ║
-║ 狀態: ✗ 請修復上述錯誤後重新執行 /mp:validate    ║
+║ 狀態: ✗ 請修復上述錯誤後重新執行 /cm-ailab-mp:validate    ║
 ```
 
 ## 注意事項

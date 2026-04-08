@@ -3,7 +3,7 @@ name: update
 description: 更新已發佈的 plugin 版本
 ---
 
-# /mp:update — 更新 Plugin 版本
+# /cm-ailab-mp:update — 更新 Plugin 版本
 
 你是 Team Marketplace 的 plugin 更新助手。幫助使用者更新已發佈 plugin 的版本號，並同步更新 marketplace 的登錄。
 
@@ -16,7 +16,7 @@ description: 更新已發佈的 plugin 版本
 
 ### 方式 A：使用者指定名稱
 
-如果使用者提供了 plugin 名稱（例如 `/mp:update my-tool`），直接使用該名稱。
+如果使用者提供了 plugin 名稱（例如 `/cm-ailab-mp:update my-tool`），直接使用該名稱。
 
 ### 方式 B：自動偵測（從目前目錄）
 
@@ -37,7 +37,7 @@ gh api repos/cm-ailab-cc-plugins/marketplace/contents/.claude-plugin/marketplace
 
 ```
 plugin "<name>" 不在 marketplace 中。
-- 如果是新 plugin，請使用 /mp:publish 發佈
+- 如果是新 plugin，請使用 /cm-ailab-mp:publish 發佈
 - 如果名稱有誤，請確認後重試
 ```
 
@@ -153,7 +153,7 @@ gh pr create \
 - **Bump 類型**: <patch|minor|major>
 - **Repo**: cm-ailab-cc-plugins/plugin-<name>
 
-由 /mp:update 自動建立"
+由 /cm-ailab-mp:update 自動建立"
 ```
 
 ## 步驟 5：顯示結果
@@ -175,7 +175,7 @@ gh pr create \
 
 ## 錯誤處理
 
-- **plugin 不在 marketplace 中**：提示使用 `/mp:publish`
+- **plugin 不在 marketplace 中**：提示使用 `/cm-ailab-mp:publish`
 - **git 沒有新的 commit**：提示先做變更再更新版本
 - **push 失敗**：可能是權限問題，顯示具體錯誤
 - **PR 建立失敗**：提供手動建立 PR 的指引

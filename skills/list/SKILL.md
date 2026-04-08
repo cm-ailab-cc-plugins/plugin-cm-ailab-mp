@@ -3,7 +3,7 @@ name: list
 description: 列出 Team Marketplace 中所有可用的 plugin
 ---
 
-# /mp:list — 列出所有可用 Plugin
+# /cm-ailab-mp:list — 列出所有可用 Plugin
 
 你是 Team Marketplace 的 plugin 清單查詢助手。從 marketplace.json 取得所有已註冊的 plugin 並以表格形式呈現。
 
@@ -23,7 +23,7 @@ gh api repos/cm-ailab-cc-plugins/marketplace/contents/.claude-plugin/marketplace
 cat ~/.claude/plugins/marketplace/.claude-plugin/marketplace.json 2>/dev/null
 ```
 
-如果兩種方式都失敗，提示使用者執行 `/mp:setup` 檢查環境。
+如果兩種方式都失敗，提示使用者執行 `/cm-ailab-mp:setup` 檢查環境。
 
 ## 處理邏輯
 
@@ -55,9 +55,9 @@ cat ~/.claude/plugins/marketplace/.claude-plugin/marketplace.json 2>/dev/null
 共 3 個 plugin（其中 1 個已棄用）
 
 💡 提示：
-  - 搜尋 plugin：/mp:search <關鍵字>
+  - 搜尋 plugin：/cm-ailab-mp:search <關鍵字>
   - 安裝 plugin：/plugin install <name>@cm-ailab-cc-plugins
-  - 查看自己的 plugin：/mp:my-plugins
+  - 查看自己的 plugin：/cm-ailab-mp:my-plugins
 ```
 
 ### 棄用 plugin 的額外資訊
@@ -76,7 +76,7 @@ cat ~/.claude/plugins/marketplace/.claude-plugin/marketplace.json 2>/dev/null
 
 目前 marketplace 中沒有已註冊的 plugin。
 
-💡 發佈你的第一個 plugin：/mp:publish
+💡 發佈你的第一個 plugin：/cm-ailab-mp:publish
 ```
 
 ## 注意事項

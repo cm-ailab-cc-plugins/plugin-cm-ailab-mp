@@ -3,7 +3,7 @@ name: publish
 description: 引導式發佈新 plugin 到 Team Marketplace
 ---
 
-# /mp:publish — 發佈 Plugin 到 Team Marketplace
+# /cm-ailab-mp:publish — 發佈 Plugin 到 Team Marketplace
 
 你是 Team Marketplace 的 plugin 發佈助手。透過互動式引導流程，幫助使用者將 plugin 發佈到團隊 marketplace。
 
@@ -15,7 +15,7 @@ description: 引導式發佈新 plugin 到 Team Marketplace
 which gh && gh auth status 2>&1 | head -3
 ```
 
-如果 gh 未安裝或未登入，提示使用者先執行 `/mp:setup`。
+如果 gh 未安裝或未登入，提示使用者先執行 `/cm-ailab-mp:setup`。
 
 ## 步驟 1：了解 Plugin 內容
 
@@ -25,7 +25,7 @@ which gh && gh auth status 2>&1 | head -3
 2. **是否已有現成的檔案？** — 例如已寫好的 SKILL.md、hooks.json 等
 3. **檔案在哪裡？** — 如果有現成檔案，取得路徑
 
-如果使用者在執行 `/mp:publish` 時已經在一個 plugin 目錄中（包含 `.claude-plugin/plugin.json`），自動偵測並確認：
+如果使用者在執行 `/cm-ailab-mp:publish` 時已經在一個 plugin 目錄中（包含 `.claude-plugin/plugin.json`），自動偵測並確認：
 
 ```bash
 test -f .claude-plugin/plugin.json && cat .claude-plugin/plugin.json
@@ -73,7 +73,7 @@ test -f .claude-plugin/plugin.json && cat .claude-plugin/plugin.json
 gh api repos/cm-ailab-cc-plugins/marketplace/contents/.claude-plugin/marketplace.json --jq '.content' | base64 -d | jq -r --arg name "<chosen-name>" '.plugins[] | select(.name == $name) | .name'
 ```
 
-- 如果已存在同名 plugin，提示使用者更換名稱或使用 `/mp:update` 更新現有 plugin
+- 如果已存在同名 plugin，提示使用者更換名稱或使用 `/cm-ailab-mp:update` 更新現有 plugin
 - 如果不存在，繼續
 
 ## 步驟 5：描述與關鍵字
@@ -325,7 +325,7 @@ gh pr create \
 - **描述**: <description>
 - **Repo**: cm-ailab-cc-plugins/plugin-<name>
 
-由 /mp:publish 自動建立"
+由 /cm-ailab-mp:publish 自動建立"
 ```
 
 ## 步驟 8：顯示結果
@@ -342,13 +342,13 @@ gh pr create \
 ║ 1. 等待 PR 審查與合併                   ║
 ║ 2. 合併後即可安裝：                     ║
 ║    /plugin install <name>@cm-ailab-cc-plugins ║
-║ 3. 更新版本：/mp:update <name>          ║
+║ 3. 更新版本：/cm-ailab-mp:update <name>          ║
 ╚══════════════════════════════════════════╝
 ```
 
 ## 錯誤處理
 
-- **gh 未安裝**：提示執行 `/mp:setup`
+- **gh 未安裝**：提示執行 `/cm-ailab-mp:setup`
 - **未登入 GitHub**：提示執行 `gh auth login`
 - **無組織權限**：提示聯繫管理員
 - **repo 建立失敗**：顯示具體錯誤訊息，建議檢查命名或權限

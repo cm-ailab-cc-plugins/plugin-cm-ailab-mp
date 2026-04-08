@@ -3,7 +3,7 @@ name: my-plugins
 description: 列出自己發佈的 plugin
 ---
 
-# /mp:my-plugins — 列出自己的 Plugin
+# /cm-ailab-mp:my-plugins — 列出自己的 Plugin
 
 你是 Team Marketplace 的個人 plugin 查詢助手。查詢目前登入使用者所發佈的所有 plugin。
 
@@ -15,7 +15,7 @@ description: 列出自己發佈的 plugin
 gh api /user --jq '.login'
 ```
 
-如果失敗，提示使用者執行 `gh auth login` 或 `/mp:setup`。
+如果失敗，提示使用者執行 `gh auth login` 或 `/cm-ailab-mp:setup`。
 
 ## 取得 Marketplace 資料
 
@@ -52,9 +52,9 @@ cat ~/.claude/plugins/marketplace/.claude-plugin/marketplace.json 2>/dev/null
 共 2 個 plugin（1 個活躍、1 個已棄用）
 
 💡 可用操作：
-  - 更新 plugin 版本：/mp:update <name>
-  - 棄用 plugin：/mp:deprecate <name>
-  - 發佈新 plugin：/mp:publish
+  - 更新 plugin 版本：/cm-ailab-mp:update <name>
+  - 棄用 plugin：/cm-ailab-mp:deprecate <name>
+  - 發佈新 plugin：/cm-ailab-mp:publish
 ```
 
 ### 沒有自己的 plugin 時
@@ -64,7 +64,7 @@ cat ~/.claude/plugins/marketplace/.claude-plugin/marketplace.json 2>/dev/null
 
 你還沒有發佈任何 plugin。
 
-💡 發佈你的第一個 plugin：/mp:publish
+💡 發佈你的第一個 plugin：/cm-ailab-mp:publish
 ```
 
 ### 狀態欄位說明
