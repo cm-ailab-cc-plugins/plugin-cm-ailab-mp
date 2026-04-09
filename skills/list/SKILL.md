@@ -56,7 +56,7 @@ cat ~/.claude/plugins/marketplace/.claude-plugin/marketplace.json 2>/dev/null
 
 💡 提示：
   - 搜尋 plugin：/cm-ailab-mp:search <關鍵字>
-  - 安裝 plugin：/plugin install <name>@cm-ailab-cc-plugins
+  - 安裝 plugin：/cm-ailab-mp:install <name>
   - 查看自己的 plugin：/cm-ailab-mp:my-plugins
 ```
 

@@ -68,7 +68,7 @@ cat ~/.claude/plugins/marketplace/.claude-plugin/marketplace.json 2>/dev/null
 
 找到 2 個符合的 plugin
 
-💡 安裝 plugin：/plugin install <name>@cm-ailab-cc-plugins
+💡 安裝 plugin：/cm-ailab-mp:install <name>
 ```
 
 ### 使用 --all 旗標時
