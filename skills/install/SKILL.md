@@ -1,11 +1,15 @@
 ---
 name: install
-description: 從 Team Marketplace 安裝 plugin（使用 gh CLI 認證，自動排查問題）
+description: 從 Team Marketplace 安裝 plugin（先試內建安裝，失敗則用 gh CLI fallback，再失敗則排查環境）
 ---
 
 # /cm-ailab-mp:install — 安裝 Plugin
 
-你是 Team Marketplace 的 plugin 安裝助手。使用 `gh` CLI 來 clone 和安裝 plugin，繞過 Claude Code 內建 plugin 系統的 SSH 限制。
+你是 Team Marketplace 的 plugin 安裝助手。安裝流程採用 **逐層 fallback** 策略：
+
+1. **先試內建安裝**（`/plugin install`）— 最乾淨，由 Claude Code 原生管理
+2. **失敗則用 `gh repo clone` 手動安裝** — 繞過 SSH 問題，用 gh token 認證
+3. **再失敗則排查環境** — 診斷 SSH / gh / git 狀態並修復
 
 ## 參數
 
@@ -29,15 +33,7 @@ gh auth status 2>&1 | head -5
 
 如果未登入，提示使用者執行 `gh auth login`。
 
-### 1.2 確認組織成員資格
-
-```bash
-gh api /user/memberships/orgs/cm-ailab-cc-plugins --jq '.state' 2>/dev/null
-```
-
-如果不是 `active`，提示使用者聯繫管理員加入組織。
-
-### 1.3 查詢 plugin 資訊
+### 1.2 查詢 plugin 資訊
 
 從 marketplace.json 取得目標 plugin 的完整資訊：
 
@@ -59,7 +55,7 @@ gh api repos/cm-ailab-cc-plugins/marketplace/contents/.claude-plugin/marketplace
 查看所有可用 plugin：/cm-ailab-mp:list
 ```
 
-### 1.4 檢查是否已安裝
+### 1.3 檢查是否已安裝
 
 ```bash
 cat ~/.claude/plugins/installed_plugins.json 2>/dev/null | jq -r --arg id "<name>@cm-ailab-cc-plugins" '.plugins[$id] // empty'
@@ -94,9 +90,28 @@ plugin "<name>" 已經安裝。
 - 選擇 1 → `scope = "user"`
 - 選擇 2 → `scope = "project"`，並記錄 `projectPath` 為目前工作目錄
 
-## 步驟 3：Clone Plugin
+## 步驟 3：嘗試安裝（逐層 fallback）
 
-使用 `gh repo clone` clone 到 cache 目錄：
+### 3.1 第一層：內建 `/plugin install`
+
+告訴使用者先嘗試內建安裝：
+
+```
+請先嘗試內建安裝：
+
+/plugin install <name>@cm-ailab-cc-plugins
+
+安裝完成後告訴我結果。如果失敗了，把錯誤訊息貼給我，我會用其他方式安裝。
+```
+
+等待使用者回報結果：
+
+- **成功** → 跳到步驟 5（顯示結果），不需要步驟 4
+- **失敗** → 繼續 3.2
+
+### 3.2 第二層：`gh repo clone` 手動安裝
+
+內建安裝失敗時，改用 `gh repo clone`：
 
 ```bash
 # 定義路徑
@@ -112,28 +127,60 @@ rm -rf "$CACHE_DIR"
 gh repo clone <source.repo> "$CACHE_DIR" -- --depth 1 --branch <source.ref>
 ```
 
-如果 clone 失敗，Claude 應該：
+- **成功** → 取得 SHA、清理 .git、繼續步驟 4 註冊
+- **失敗** → 繼續 3.3
 
-1. 讀取錯誤訊息
-2. 嘗試診斷原因（權限？網路？repo 不存在？）
-3. 如果是帳號問題，嘗試 `gh auth switch` 到有權限的帳號
-4. 重試 clone
-
-### 取得 git commit SHA
+#### 取得 git commit SHA
 
 ```bash
 cd "$CACHE_DIR" && git rev-parse HEAD
 ```
 
-記錄這個 SHA 供後續寫入 installed_plugins.json。
-
-### 清理 .git 目錄
+#### 清理 .git 目錄
 
 ```bash
 rm -rf "$CACHE_DIR/.git"
 ```
 
+### 3.3 第三層：環境排查
+
+兩層都失敗時，執行完整環境診斷：
+
+```bash
+# 1. gh 登入狀態與 active 帳號
+gh auth status 2>&1
+
+# 2. SSH 連線測試
+ssh -T git@github.com 2>&1
+
+# 3. git protocol 設定
+gh config get git_protocol 2>&1
+
+# 4. 組織成員資格（用每個 gh 帳號嘗試）
+gh api /user/memberships/orgs/cm-ailab-cc-plugins --jq '.state' 2>/dev/null
+
+# 5. 目標 repo 是否存在且可存取
+gh api repos/<source.repo> --jq '.full_name' 2>&1
+
+# 6. 嘗試直接 HTTPS clone（繞過 gh）
+git clone --depth 1 --branch <source.ref> https://github.com/<source.repo>.git /tmp/test-plugin-clone 2>&1
+```
+
+根據診斷結果，針對性修復：
+
+| 診斷結果 | 修復方式 |
+|----------|----------|
+| SSH 認證到錯誤帳號 | 建議 `gh auth switch` 或修改 `~/.ssh/config` |
+| gh 的 active 帳號不在 org 裡 | `gh auth switch --user <有權限的帳號>` |
+| repo 不存在 | 確認 marketplace.json 中的 repo 路徑 |
+| HTTPS clone 成功但 gh clone 失敗 | 用 HTTPS 結果繼續安裝 |
+| 完全無法存取 | 提示聯繫管理員確認 org 成員資格和 repo 權限 |
+
+修復後重試 clone。
+
 ## 步驟 4：註冊 Plugin
+
+（只有第二層 `gh repo clone` 安裝時需要，內建安裝會自動處理）
 
 ### 4.1 更新 installed_plugins.json
 
@@ -225,27 +272,18 @@ mv /tmp/settings_updated.json "$SETTINGS_FILE"
 ╠══════════════════════════════════════════╣
 ║ Plugin:  <name> v<version>              ║
 ║ Scope:   <user 或 project>              ║
-║ 路徑:    <CACHE_DIR>                    ║
+║ 方式:    <內建安裝 或 gh clone>         ║
 ╠══════════════════════════════════════════╣
 ║ 下一步:                                 ║
 ║ 執行 /reload-plugins 以啟用 plugin      ║
 ╚══════════════════════════════════════════╝
 ```
 
-## 錯誤處理
-
-每一步失敗時，Claude 應該主動排查而不是直接報錯：
-
-- **gh 未登入** → 提示 `gh auth login`
-- **不是組織成員** → 提示聯繫管理員
-- **clone 失敗（權限）** → 嘗試 `gh auth switch` 到其他帳號重試
-- **clone 失敗（repo 不存在）** → 確認 marketplace.json 中的 repo 路徑是否正確
-- **jq 未安裝** → 用 python3 替代處理 JSON
-- **settings.json 寫入失敗** → 檢查檔案權限
-
 ## 注意事項
 
-- 所有 git 操作使用 `gh repo clone`，不要用 `git clone`，確保走 gh 的認證
+- 優先使用內建 `/plugin install`，它由 Claude Code 原生管理，更新和解除安裝更方便
+- 只有內建安裝失敗時才 fallback 到 `gh repo clone`
+- `gh repo clone` 安裝時，所有 git 操作用 `gh`，不要用 `git clone`，確保走 gh 的認證
 - 不要修改使用者的 SSH config 或 git config
 - 安裝過程中遇到任何問題，優先自己排查修復，不要直接丟錯誤給使用者
 - 所有輸出使用繁體中文
