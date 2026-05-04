@@ -49,7 +49,9 @@ test -f .claude-plugin/plugin.json && cat .claude-plugin/plugin.json
 
 向使用者提出 2-3 個建議，讓使用者選擇或自訂。
 
-## 步驟 3：決定類型
+## 步驟 3：決定類型與分類
+
+### 3.1 類型 (type)
 
 詢問使用者 plugin 的類型，並說明每個類型的用途和安全等級：
 
@@ -64,6 +66,24 @@ test -f .claude-plugin/plugin.json && cat .claude-plugin/plugin.json
 | mcp | MCP 伺服器 | 🟡 中風險 | 提供外部工具整合 |
 | mixed | 混合類型 | 依內容而定 | 包含多種類型的組合 |
 ```
+
+### 3.2 分類 (category)
+
+詢問使用者 plugin 的分類，從以下 marketplace 既有 enum 中選一個：
+
+```
+請選擇 plugin 分類：
+
+| 分類 | 適用場景 |
+|------|----------|
+| development | 開發工具、程式碼輔助、build/test/deploy |
+| productivity | 一般生產力、流程工具、任務管理 |
+| communication | 訊息/通訊整合（Slack、GChat、Email…） |
+| content-creation | 文件、簡報、媒體、內容產生 |
+| analytics | 資料分析、監控、報表、追蹤 |
+```
+
+如果使用者描述的功能不明顯屬於哪一類，根據步驟 1 的功能簡述主動建議一個並請使用者確認。category 是 marketplace 必填欄位，不可省略。
 
 ## 步驟 4：檢查重複
 
@@ -106,11 +126,14 @@ gh api repos/cm-ailab-cc-plugins/marketplace/contents/.claude-plugin/marketplace
 ╠══════════════════════════════════════════╣
 ║ 名稱:     <name>                        ║
 ║ 類型:     <type>                        ║
+║ 分類:     <category>                    ║
 ║ 版本:     1.0.0                         ║
 ║ 描述:     <description>                 ║
 ║ 關鍵字:   <kw1>, <kw2>, ...             ║
 ║ 作者:     <author> (<github>)           ║
 ║ Repo:     cm-ailab-cc-plugins/plugin-<name> ║
+║ Source:   github (ref: v1.0.0)          ║
+║ Homepage: https://github.com/cm-ailab-cc-plugins/plugin-<name> ║
 ╠══════════════════════════════════════════╣
 ║ 即將執行的操作:                          ║
 ║ 1. 在 cm-ailab-cc-plugins 建立 repo     ║
@@ -122,6 +145,8 @@ gh api repos/cm-ailab-cc-plugins/marketplace/contents/.claude-plugin/marketplace
 
 確認發佈？(y/n)
 ```
+
+**重要**：上述所有欄位（name / category / version / source / homepage / author / keywords）都會被寫入 marketplace.json，缺一不可。發佈前請逐項與使用者確認。
 
 等待使用者確認後才繼續。
 
@@ -237,7 +262,9 @@ cp -r <source-path>/mcp-servers/* /tmp/plugin-<name>/mcp-servers/ 2>/dev/null
 cp <source-path>/README.md /tmp/plugin-<name>/README.md 2>/dev/null
 ```
 
-如果使用者在步驟 1 提供了已有的 `.claude-plugin/plugin.json`，用步驟 5 確認的資訊更新它（保留使用者確認的 name/version/description/keywords）。
+如果使用者在步驟 1 提供了已有的 `.claude-plugin/plugin.json`，用步驟 3-5 確認的資訊更新它，欄位以使用者確認版本為準：`name` / `version` / `type` / `description` / `keywords` / `author`。
+
+注意：`category` 與 `homepage` 只屬於 marketplace.json，**不要**寫進 plugin.json。
 
 ### 7.6 建立 README.md（如果不存在）
 
@@ -283,29 +310,54 @@ git checkout -b add-plugin-<name>
 # 更新 marketplace.json — 在 plugins 陣列中新增條目
 ```
 
-使用 jq 更新 marketplace.json：
+使用 jq 更新 marketplace.json。**注意必填欄位齊全**：`name`、`description`、`version`、`category`、`source.{source,repo,ref}`、`homepage`、`author.{name,github}`、`keywords`。
 
 ```bash
 jq --arg name "<name>" \
    --arg desc "<description>" \
-   --arg type "<type>" \
+   --arg version "1.0.0" \
+   --arg category "<category>" \
    --arg repo "cm-ailab-cc-plugins/plugin-<name>" \
    --arg ref "v1.0.0" \
+   --arg homepage "https://github.com/cm-ailab-cc-plugins/plugin-<name>" \
    --arg author_name "<author-name>" \
    --arg author_github "<github-login>" \
    --argjson keywords '["<kw1>","<kw2>"]' \
    '.plugins += [{
      name: $name,
      description: $desc,
-     type: $type,
-     source: { repo: $repo, ref: $ref },
-     keywords: $keywords,
-     author: { name: $author_name, github: $author_github }
+     version: $version,
+     category: $category,
+     source: { source: "github", repo: $repo, ref: $ref },
+     homepage: $homepage,
+     author: { name: $author_name, github: $author_github },
+     keywords: $keywords
    }]' \
    .claude-plugin/marketplace.json > /tmp/marketplace-updated.json
 
 mv /tmp/marketplace-updated.json .claude-plugin/marketplace.json
 ```
+
+寫完後立刻用 jq 驗證新增的條目所有欄位都齊全（避免 silent 漏欄位）。**驗證失敗必須中止後續所有 git/PR 操作**：
+
+```bash
+jq -e --arg name "<name>" '.plugins[] | select(.name == $name) |
+  (.name|type=="string" and length>0) and
+  (.description|type=="string" and length>=10) and
+  (.version|type=="string" and length>0) and
+  (.category|type=="string" and length>0) and
+  (.source.source == "github") and
+  (.source.repo|type=="string" and length>0) and
+  (.source.ref|type=="string" and length>0) and
+  (.homepage|type=="string" and length>0) and
+  (.author.name|type=="string" and length>0) and
+  (.author.github|type=="string" and length>0) and
+  (.keywords|type=="array" and length>=2)' \
+  .claude-plugin/marketplace.json \
+  || { echo "❌ marketplace.json 必填欄位驗證失敗，中止後續 commit/push/PR 操作"; exit 1; }
+```
+
+`jq -e` 在表達式為 `false` 或 `null` 時退出碼 1，搭配 `|| exit 1` 確保任一欄位缺失或空字串都會中止整個流程。
 
 提交並建立 PR：
 
@@ -321,9 +373,14 @@ gh pr create \
 
 - **名稱**: <name>
 - **類型**: <type>
+- **分類**: <category>
 - **版本**: 1.0.0
 - **描述**: <description>
+- **關鍵字**: <kw1>, <kw2>, ...
 - **Repo**: cm-ailab-cc-plugins/plugin-<name>
+- **Source**: github (ref: v1.0.0)
+- **Homepage**: https://github.com/cm-ailab-cc-plugins/plugin-<name>
+- **作者**: <author-name> (<github-login>)
 
 由 /cm-ailab-mp:publish 自動建立"
 ```

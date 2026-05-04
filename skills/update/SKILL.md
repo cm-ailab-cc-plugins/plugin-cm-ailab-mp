@@ -91,7 +91,8 @@ git log $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~10")..HEAD --
 ║ 即將執行的操作:                          ║
 ║ 1. 更新 plugin.json 中的 version        ║
 ║ 2. Commit & tag v<new-version> & push   ║
-║ 3. 更新 marketplace.json 中的 ref       ║
+║ 3. 同步更新 marketplace.json 中的       ║
+║    version 與 source.ref（兩處同步）     ║
 ║ 4. 建立 marketplace PR                  ║
 ╚══════════════════════════════════════════╝
 
@@ -129,13 +130,28 @@ cd /tmp/marketplace-update
 # 建立 PR 分支
 git checkout -b update-plugin-<name>-v<new-version>
 
-# 更新 marketplace.json 中的 ref
+# 同步更新 marketplace.json 的 version 與 source.ref
+# 重要：兩處必須一起改。只改 source.ref 會導致 top-level version 永遠停留在舊值，
+# 造成 marketplace 顯示「最新版本」與實際 tag 不一致的 silent bug。
 jq --arg name "<name>" \
+   --arg version "<new-version>" \
    --arg ref "v<new-version>" \
-   '(.plugins[] | select(.name == $name) | .source.ref) = $ref' \
+   '(.plugins[] | select(.name == $name)) |= (.version = $version | .source.ref = $ref)' \
    .claude-plugin/marketplace.json > /tmp/marketplace-updated.json
 
 mv /tmp/marketplace-updated.json .claude-plugin/marketplace.json
+
+# 寫後驗證：確認兩個欄位都被更新
+# 注意：jq error() 退出碼 5 但只終結 jq 自己。必須用 || exit 1 串起來，
+# 否則後面的 git add/commit/push/gh pr create 仍會在 silent desync 下繼續執行。
+jq --arg name "<name>" --arg ref "v<new-version>" --arg version "<new-version>" \
+  '.plugins[] | select(.name == $name) |
+    if .version == $version and .source.ref == $ref
+    then "OK: \(.name) version=\(.version) ref=\(.source.ref)"
+    else error("desync: version=\(.version) ref=\(.source.ref)")
+    end' \
+  .claude-plugin/marketplace.json \
+  || { echo "❌ marketplace.json 驗證失敗，中止後續 git/PR 操作"; exit 1; }
 
 # 提交並建立 PR
 git add .claude-plugin/marketplace.json
